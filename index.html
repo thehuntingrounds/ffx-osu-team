@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Fantasy X [FFX] - Team Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-dark: #080b12;
+      --panel-bg: rgba(13, 19, 33, 0.75);
+      --panel-border: rgba(99, 179, 237, 0.25);
+      --accent-blue: #3182ce;
+      --accent-glow: #63b3ed;
+      --text-main: #e2e8f0;
+      --text-muted: #a0aec0;
+      --gold-accent: #ecc94b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Floating Pyreflies Effect */
+    #pyreflies {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Header Banner Section */
+    .hero {
+      text-align: center;
+      padding: 50px 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(49, 130, 206, 0.15);
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2.8rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 15px var(--accent-glow);
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+
+    /* Form & Message Cards */
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 30px;
+    }
+
+    .card h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      color: var(--accent-glow);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(8, 11, 18, 0.8);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 10px rgba(99, 179, 237, 0.3);
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--accent-blue), #2b6cb0);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #4299e1, var(--accent-blue));
+      box-shadow: 0 4px 18px rgba(99, 179, 237, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Guestbook List */
+    .message-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 0;
+    }
+
+    .message-item:last-child {
+      border-bottom: none;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .author-name {
+      font-weight: 600;
+      color: var(--gold-accent);
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .message-body {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="pyreflies"></canvas>
+
+  <div class="container">
+    <div class="hero">
+      <h1>FINAL FANTASY X</h1>
+      <p>[FFX] Team Portal & Guestbook</p>
+    </div>
+
+    <!-- Message Submission Form -->
+    <div class="card">
+      <h2>Leave a Message</h2>
+      <form id="guestbook-form">
+        <div class="form-group">
+          <label for="username">osu! Username</label>
+          <input type="text" id="username" placeholder="Enter your osu! username" required>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" rows="3" placeholder="Leave a message for the team..." required></textarea>
+        </div>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+
+    <!-- Live Messages Feed -->
+    <div class="card">
+      <h2>Team Wall</h2>
+      <div id="messages-list">
+        <p style="color: var(--text-muted); font-size: 0.9rem;">No messages yet. Be the first to post!</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pyrefly Particle System
+    const canvas = document.getElementById('pyreflies');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2.5 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4 - 0.2;
+        this.alpha = Math.random() * 0.6 + 0.2;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.fillStyle = `rgba(154, 230, 255, ${this.alpha})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#63b3ed';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 40; i++) {
+      particles.push(new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Local Storage Guestbook Handler
+    const form = document.getElementById('guestbook-form');
+    const messagesList = document.getElementById('messages-list');
+
+    function loadMessages() {
+      const stored = JSON.parse(localStorage.getItem('ffx_team_messages') || '[]');
+      if (stored.length === 0) return;
+
+      messagesList.innerHTML = stored.map(msg => `
+        <div class="message-item">
+          <div class="message-header">
+            <div class="author-info">
+              <span class="author-name">${escapeHtml(msg.username)}</span>
+            </div>
+            <span class="timestamp">${msg.time}</span>
+          </div>
+          <div class="message-body">${escapeHtml(msg.text)}</div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      })[m]);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const text = document.getElementById('message').value.trim();
+
+      if (!username || !text) return;
+
+      const newMessage = {
+        username,
+        text,
+        time: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      };
+
+      const stored = JSON.parse(localStorage.getItem('ffx_team_messages') || '[]');
+      stored.unshift(newMessage);
+      localStorage.setItem('ffx_team_messages', JSON.stringify(stored));
+
+      document.getElementById('message').value = '';
+      loadMessages();
+    });
+
+    loadMessages();
+  </script>
+</body>
+</html>
