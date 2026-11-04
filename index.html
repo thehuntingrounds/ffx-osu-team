@@ -324,7 +324,7 @@
         // --- OSU OAUTH LOGIN HANDLING (Implicit Flow) ---
         function loginWithOsu() {
             const redirectUri = window.location.origin + window.location.pathname;
-            const authUrl = `https://osu.ppy.sh/oauth/authorize?client_id=${OSU_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token`;
+            const authUrl = `https://osu.ppy.sh/oauth/authorize?client_id=${OSU_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
             window.location.href = authUrl;
         }
 
