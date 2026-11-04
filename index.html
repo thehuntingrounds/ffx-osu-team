@@ -254,6 +254,7 @@
         const SUPABASE_URL = 'https://wewekkzyplxzonzjgkql.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_vjZNgjixO5e7s1mwGIIHTQ_9zMY8...'; 
         const OSU_CLIENT_ID = '74240'; 
+        const WORKER_URL = 'https://ffx-osu-auth.trollwarlordpolo.workers.dev';
 
         let supabaseClient = null;
         let loggedInUser = null;
@@ -321,7 +322,7 @@
             fetchMessages();
         }
 
-        // --- OSU OAUTH LOGIN HANDLING (Implicit Flow) ---
+        // --- OSU OAUTH LOGIN HANDLING (Cloudflare Worker Bridge) ---
         function loginWithOsu() {
             const redirectUri = window.location.origin + window.location.pathname;
             const authUrl = `https://osu.ppy.sh/oauth/authorize?client_id=${OSU_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
@@ -329,45 +330,29 @@
         }
 
         async function handleOsuCallback() {
-            const fragment = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = fragment.get('access_token');
-            if (!accessToken) return;
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            if (!code) return;
 
-            localStorage.setItem('osu_token', accessToken);
+            // Clear query parameters from URL cleanly
             window.history.replaceState({}, document.title, window.location.pathname);
             showToast('Authenticating with osu! account...');
 
             try {
-                const response = await fetch('https://osu.ppy.sh/api/v2/me', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
+                const redirectUri = window.location.origin + window.location.pathname;
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, redirect_uri: redirectUri })
                 });
-                if (!response.ok) throw new Error('Failed to fetch user');
-                
-                loggedInUser = await response.json();
-                
-                // Auto-fill username and lock it down for verified users
-                const usernameInput = document.getElementById('username');
-                usernameInput.value = loggedInUser.username;
-                usernameInput.readOnly = true;
-                usernameInput.classList.add('bg-slate-800/80', 'text-cyan-300', 'cursor-not-allowed');
 
-                // Update Header UI
-                document.getElementById('authHeaderArea').innerHTML = `
-                    <div class="flex items-center gap-3 bg-cyan-950/60 border border-cyan-500/40 px-3 py-1.5 rounded-lg">
-                        ${loggedInUser.avatar_url ? `<img src="${loggedInUser.avatar_url}" class="w-7 h-7 rounded-full border border-cyan-400 object-cover">` : ''}
-                        <span class="text-xs font-bold text-white">${loggedInUser.username}</span>
-                        <button onclick="logoutOsu()" class="text-[10px] text-gray-400 hover:text-rose-400 ml-2" title="Log out"><i class="fa-solid fa-right-from-bracket"></i></button>
-                    </div>
-                `;
-
-                document.getElementById('formAuthBadge').textContent = 'Verified osu! User';
-                document.getElementById('formAuthBadge').className = 'text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
-                document.getElementById('formSubText').textContent = 'Logged in via verified osu! account.';
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Failed to exchange token');
                 
+                loggedInUser = data.user;
+                localStorage.setItem('osu_user_cache', JSON.stringify(loggedInUser));
+                
+                applyUserSession(loggedInUser);
                 showToast('Successfully logged in with osu!');
             } catch (err) {
                 console.error('OAuth profile fetch error:', err);
@@ -375,16 +360,43 @@
             }
         }
 
+        function applyUserSession(user) {
+            const usernameInput = document.getElementById('username');
+            usernameInput.value = user.username;
+            usernameInput.readOnly = true;
+            usernameInput.classList.add('bg-slate-800/80', 'text-cyan-300', 'cursor-not-allowed');
+
+            // Update Header UI
+            document.getElementById('authHeaderArea').innerHTML = `
+                <div class="flex items-center gap-3 bg-cyan-950/60 border border-cyan-500/40 px-3 py-1.5 rounded-lg">
+                    ${user.avatar_url ? `<img src="${user.avatar_url}" class="w-7 h-7 rounded-full border border-cyan-400 object-cover">` : ''}
+                    <span class="text-xs font-bold text-white">${user.username}</span>
+                    <button onclick="logoutOsu()" class="text-[10px] text-gray-400 hover:text-rose-400 ml-2" title="Log out"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            `;
+
+            document.getElementById('formAuthBadge').textContent = 'Verified osu! User';
+            document.getElementById('formAuthBadge').className = 'text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+            document.getElementById('formSubText').textContent = 'Logged in via verified osu! account.';
+        }
+
         function logoutOsu() {
-            localStorage.removeItem('osu_token');
+            localStorage.removeItem('osu_user_cache');
             window.location.reload();
         }
 
         async function checkExistingLogin() {
-            const token = localStorage.getItem('osu_token');
-            if (token) {
-                handleOsuCallback();
+            const cached = localStorage.getItem('osu_user_cache');
+            if (cached) {
+                try {
+                    loggedInUser = JSON.parse(cached);
+                    applyUserSession(loggedInUser);
+                } catch(e) {
+                    localStorage.removeItem('osu_user_cache');
+                }
             }
+            // Check if returning from osu! auth redirect with code
+            handleOsuCallback();
         }
 
         async function fetchMessages() {
