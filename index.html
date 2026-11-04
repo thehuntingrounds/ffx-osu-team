@@ -322,9 +322,12 @@
             fetchMessages();
         }
 
-        // --- OSU OAUTH LOGIN HANDLING (Cloudflare Worker Bridge) ---
+        // --- OSU OAUTH LOGIN HANDLING (Cloudflare Worker Bridge with Trailing Slash Fix) ---
         function loginWithOsu() {
-            const redirectUri = window.location.origin + window.location.pathname;
+            let redirectUri = window.location.origin + window.location.pathname;
+            if (!redirectUri.endsWith('/')) {
+                redirectUri += '/';
+            }
             const authUrl = `https://osu.ppy.sh/oauth/authorize?client_id=${OSU_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
             window.location.href = authUrl;
         }
@@ -339,7 +342,11 @@
             showToast('Authenticating with osu! account...');
 
             try {
-                const redirectUri = window.location.origin + window.location.pathname;
+                let redirectUri = window.location.origin + window.location.pathname;
+                if (!redirectUri.endsWith('/')) {
+                    redirectUri += '/';
+                }
+
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -488,8 +495,7 @@
                 role: role,
                 message: message,
                 verified: !!loggedInUser,
-                avatar_url: loggedInUser ? loggedInUser.avatar_url : null,
-                created_at: new Date().toISOString()
+                avatar_url: loggedInUser ? loggedInUser.avatar_url : null
             };
 
             try {
