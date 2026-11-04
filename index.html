@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Final Fantasy X [FFX] - Team Hub</title>
+  <title>Final Fantasy X - osu!mania Team</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #080b12;
       --panel-bg: rgba(13, 19, 33, 0.75);
-      --panel-border: rgba(99, 179, 237, 0.25);
-      --accent-blue: #3182ce;
+      --panel-border: rgba(99, 179, 237, 0.2);
       --accent-glow: #63b3ed;
       --text-main: #e2e8f0;
       --text-muted: #a0aec0;
-      --gold-accent: #ecc94b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,11 +24,13 @@
       color: var(--text-main);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
-      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
       position: relative;
     }
 
-    /* Floating Pyreflies Effect */
     #pyreflies {
       position: fixed;
       top: 0; left: 0;
@@ -41,67 +40,60 @@
     }
 
     .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 40px 20px;
+      width: 100%;
+      max-width: 700px;
       position: relative;
       z-index: 2;
     }
 
-    /* Header Banner Section */
     .hero {
       text-align: center;
-      padding: 50px 20px;
+      padding: 40px 20px;
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
-      border-radius: 16px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(49, 130, 206, 0.15);
-      margin-bottom: 30px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 24px;
     }
 
     .hero h1 {
       font-family: 'Cinzel', serif;
-      font-size: 2.8rem;
+      font-size: 2.2rem;
       letter-spacing: 2px;
       color: #fff;
-      text-shadow: 0 0 15px var(--accent-glow);
-      margin-bottom: 8px;
+      text-shadow: 0 0 12px var(--accent-glow);
+      margin-bottom: 6px;
     }
 
     .hero p {
       color: var(--text-muted);
-      font-size: 1rem;
+      font-size: 0.95rem;
       letter-spacing: 1px;
     }
 
-    /* Form & Message Cards */
     .card {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
       border-radius: 12px;
       padding: 24px;
       backdrop-filter: blur(10px);
-      margin-bottom: 30px;
+      margin-bottom: 24px;
     }
 
     .card h2 {
       font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       color: var(--accent-glow);
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
       margin-bottom: 6px;
       text-transform: uppercase;
@@ -110,45 +102,40 @@
 
     input, textarea {
       width: 100%;
-      padding: 12px;
+      padding: 10px 12px;
       background: rgba(8, 11, 18, 0.8);
       border: 1px solid var(--panel-border);
       border-radius: 6px;
       color: #fff;
       font-family: inherit;
       font-size: 0.95rem;
-      transition: all 0.2s ease;
     }
 
     input:focus, textarea:focus {
       outline: none;
       border-color: var(--accent-glow);
-      box-shadow: 0 0 10px rgba(99, 179, 237, 0.3);
+      box-shadow: 0 0 8px rgba(99, 179, 237, 0.3);
     }
 
     button {
-      background: linear-gradient(135deg, var(--accent-blue), #2b6cb0);
+      background: #3182ce;
       color: #fff;
       border: none;
-      padding: 12px 24px;
+      padding: 10px 20px;
       font-family: 'Cinzel', serif;
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+      transition: background 0.2s ease;
     }
 
     button:hover {
-      background: linear-gradient(135deg, #4299e1, var(--accent-blue));
-      box-shadow: 0 4px 18px rgba(99, 179, 237, 0.5);
-      transform: translateY(-1px);
+      background: #4299e1;
     }
 
-    /* Guestbook List */
     .message-item {
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 16px 0;
+      padding: 14px 0;
     }
 
     .message-item:last-child {
@@ -158,19 +145,12 @@
     .message-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .author-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      margin-bottom: 4px;
     }
 
     .author-name {
       font-weight: 600;
-      color: var(--gold-accent);
+      color: #ecc94b;
     }
 
     .timestamp {
@@ -179,8 +159,7 @@
     }
 
     .message-body {
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.9rem;
       color: var(--text-main);
     }
   </style>
@@ -192,36 +171,33 @@
   <div class="container">
     <div class="hero">
       <h1>FINAL FANTASY X</h1>
-      <p>[FFX] Team Portal & Guestbook</p>
+      <p>Welcome to the official osu!mania team page.</p>
     </div>
 
-    <!-- Message Submission Form -->
     <div class="card">
       <h2>Leave a Message</h2>
       <form id="guestbook-form">
         <div class="form-group">
           <label for="username">osu! Username</label>
-          <input type="text" id="username" placeholder="Enter your osu! username" required>
+          <input type="text" id="username" placeholder="Your username" required>
         </div>
         <div class="form-group">
           <label for="message">Message</label>
-          <textarea id="message" rows="3" placeholder="Leave a message for the team..." required></textarea>
+          <textarea id="message" rows="3" placeholder="Leave a note..." required></textarea>
         </div>
-        <button type="submit">Send Message</button>
+        <button type="submit">Submit</button>
       </form>
     </div>
 
-    <!-- Live Messages Feed -->
     <div class="card">
-      <h2>Team Wall</h2>
+      <h2>Messages</h2>
       <div id="messages-list">
-        <p style="color: var(--text-muted); font-size: 0.9rem;">No messages yet. Be the first to post!</p>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">No messages yet.</p>
       </div>
     </div>
   </div>
 
   <script>
-    // Pyrefly Particle System
     const canvas = document.getElementById('pyreflies');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -234,27 +210,23 @@
     resizeCanvas();
 
     class Particle {
-      constructor() {
-        this.reset();
-      }
+      constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2.5 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.4;
-        this.speedY = (Math.random() - 0.5) * 0.4 - 0.2;
-        this.alpha = Math.random() * 0.6 + 0.2;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3 - 0.15;
+        this.alpha = Math.random() * 0.5 + 0.2;
       }
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-          this.reset();
-        }
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
       }
       draw() {
         ctx.fillStyle = `rgba(154, 230, 255, ${this.alpha})`;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = '#63b3ed';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -262,21 +234,15 @@
       }
     }
 
-    for (let i = 0; i < 40; i++) {
-      particles.push(new Particle());
-    }
+    for (let i = 0; i < 35; i++) particles.push(new Particle());
 
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.update();
-        p.draw();
-      });
+      particles.forEach(p => { p.update(); p.draw(); });
       requestAnimationFrame(animate);
     }
     animate();
 
-    // Local Storage Guestbook Handler
     const form = document.getElementById('guestbook-form');
     const messagesList = document.getElementById('messages-list');
 
@@ -287,9 +253,7 @@
       messagesList.innerHTML = stored.map(msg => `
         <div class="message-item">
           <div class="message-header">
-            <div class="author-info">
-              <span class="author-name">${escapeHtml(msg.username)}</span>
-            </div>
+            <span class="author-name">${escapeHtml(msg.username)}</span>
             <span class="timestamp">${msg.time}</span>
           </div>
           <div class="message-body">${escapeHtml(msg.text)}</div>
@@ -298,22 +262,19 @@
     }
 
     function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-      })[m]);
+      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
     }
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value.trim();
       const text = document.getElementById('message').value.trim();
-
       if (!username || !text) return;
 
       const newMessage = {
         username,
         text,
-        time: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        time: new Date().toLocaleDateString()
       };
 
       const stored = JSON.parse(localStorage.getItem('ffx_team_messages') || '[]');
